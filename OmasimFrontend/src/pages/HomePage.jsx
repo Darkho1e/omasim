@@ -100,6 +100,7 @@ const HomePage = () => {
               total_people: report.people_count,
               count: 1,
               last_reported: report.reported_at,
+              region: report.region
             };
           } else {
             acc[report.branch_id].total_people += report.people_count;
@@ -112,7 +113,8 @@ const HomePage = () => {
         const averagedReports = Object.values(groupedReports).map(report => ({
           branch_name: report.branch_name,
           people_count: Math.round(report.total_people / report.count),
-          reported_at: report.last_reported
+          reported_at: report.last_reported,
+          region: report.region
         }));
 
         setReports(averagedReports);
@@ -168,8 +170,6 @@ const HomePage = () => {
       <HelloUser userName={userName} />
       <h2>מצב עומסים</h2>
 
-      {closestBranch && <p>📍 הסניף הקרוב ביותר: {closestBranch.branch_name}</p>}
-
       <div className="reports-list">
         {loading ? (
           <p>🔄 טוען נתונים...</p>
@@ -188,7 +188,6 @@ const HomePage = () => {
           ))
         )}
       </div>
-
       <button onClick={() => !isBlocked && setShowReportModal(true)}>📢 דווח עומס</button>
 
       {showReportModal && (
@@ -197,10 +196,14 @@ const HomePage = () => {
             <h2>📢 דווח עומס</h2>
             <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
               <option value="">בחר סניף</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.branch_name}>
-                  {branch.branch_name}
-                </option>
+              {["צפון", "מרכז", "דרום"].map((region) => (
+                <optgroup key={region} label={`🌍 ${region}`}>
+                  {branches.filter((branch) => branch.region === region).map((branch) => (
+                    <option key={branch.id} value={branch.branch_name}>
+                      {branch.branch_name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <input type="number" placeholder="👥 מספר אנשים לפניך" min="1" max="85"
