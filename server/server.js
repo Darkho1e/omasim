@@ -96,7 +96,7 @@ app.post("/reports", async (req, res) => {
     if (lastBranchReport.rowCount > 0) {
       const lastReportedAt = new Date(lastBranchReport.rows[0].reported_at);
       const diffMinutes = (now - lastReportedAt) / (1000 * 60);
-      if (diffMinutes < 0.5) {
+      if (diffMinutes < 35) {
         return res.status(429).json({ error: "⏳ לא ניתן לדווח שוב על אותו סניף למשך 35 דקות!" });
       }
     }
@@ -112,7 +112,7 @@ app.post("/reports", async (req, res) => {
     if (lastOtherBranchReport.rowCount > 0) {
       const lastReportedAt = new Date(lastOtherBranchReport.rows[0].reported_at);
       const diffMinutes = (now - lastReportedAt) / (1000 * 60);
-      if (diffMinutes < 1) {
+      if (diffMinutes < 120) {
         return res.status(429).json({ error: "🚫 לא ניתן לדווח על סניפים אחרים למשך שעתיים!" });
       }
     }

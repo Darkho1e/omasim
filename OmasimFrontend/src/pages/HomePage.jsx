@@ -84,91 +84,115 @@ const HomePage = () => {
   }, [userLocation, branches]);
 
   /** 📊 שליפת דיווחים ובדיקת חסימה */
-  const fetchReports = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/reports`);
-      if (response.data?.isBlocked !== undefined) {
-        setIsBlocked(response.data.isBlocked);
-      }
-
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        // קיבוץ דיווחים לפי סניף וחישוב ממוצע
-        const groupedReports = response.data.reduce((acc, report) => {
-          if (!acc[report.branch_id]) {
-            acc[report.branch_id] = {
-              branch_name: report.branch_name,
-              total_people: report.people_count,
-              count: 1,
-              last_reported: report.reported_at,
-            };
+    /** 📊 שליפת דיווחים ובדיקת חסימה */
+    const fetchReports = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/reports`);
+        
+        if (response.data?.isBlocked !== undefined) {
+          setIsBlocked(response.data.isBlocked);
+  
+          if (response.data.blockedUntil) {
+            startCountdown(response.data.blockedUntil);
           } else {
-            acc[report.branch_id].total_people += report.people_count;
-            acc[report.branch_id].count += 1;
-            acc[report.branch_id].last_reported = report.reported_at;
+            setTimeLeft(0);
           }
-          return acc;
-        }, {});
-
-        const averagedReports = Object.values(groupedReports).map(report => ({
-          branch_name: report.branch_name,
-          people_count: Math.round(report.total_people / report.count),
-          reported_at: report.last_reported
-        }));
-
-        setReports(averagedReports);
-      } else {
-        setReports([]);
+        }
+  
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const groupedReports = response.data.reduce((acc, report) => {
+            if (!acc[report.branch_id]) {
+              acc[report.branch_id] = {
+                branch_name: report.branch_name,
+                total_people: report.people_count,
+                count: 1,
+                last_reported: report.reported_at,
+                region: report.region
+              };
+            } else {
+              acc[report.branch_id].total_people += report.people_count;
+              acc[report.branch_id].count += 1;
+              acc[report.branch_id].last_reported = report.reported_at;
+            }
+            return acc;
+          }, {});
+  
+          const averagedReports = Object.values(groupedReports).map(report => ({
+            branch_name: report.branch_name,
+            people_count: Math.round(report.total_people / report.count),
+            reported_at: report.last_reported,
+            region: report.region
+          }));
+  
+          setReports(averagedReports);
+        } else {
+          setReports([]);
+        }
+      } catch (error) {
+        console.error("⚠️ שגיאה בטעינת הדיווחים:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("⚠️ שגיאה בטעינת הדיווחים:", error);
-    } finally {
-      setLoading(false);
+    };
+  
+    useEffect(() => {
+      fetchReports();
+      const interval = setInterval(fetchReports, 9000);
+      return () => clearInterval(interval);
+    }, []);
+  
+    /** ⏳ ספירה לאחור לזמן חסימה */
+    const startCountdown = (blockedUntil) => {
+      const interval = setInterval(() => {
+        const now = new Date();
+        const blockedTime = new Date(blockedUntil);
+        const remainingTime = Math.max((blockedTime - now) / 1000, 0); // שניות
+  
+        setTimeLeft(Math.ceil(remainingTime / 60)); // הצגת דקות
+  
+        if (remainingTime <= 0) {
+          setIsBlocked(false);
+          setTimeLeft(0);
+          clearInterval(interval);
+        }
+      }, 1000);
+    };
+  
+ /** 📩 שליחת דיווח */
+ const handleSubmitReport = async () => {
+  if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
+    return alert("🚫 אינך יכול לדווח כרגע! אנא נסה מאוחר יותר.");
+  }
+
+  try {
+    const selectedBranchData = branches.find((branch) => branch.branch_name === selectedBranch);
+    if (!selectedBranchData) return alert("⚠️ שגיאה: לא נמצא סניף שנבחר.");
+
+    const ipResponse = await axios.get("https://api64.ipify.org?format=json");
+    const userIP = ipResponse.data.ip;
+
+    const data = {
+      branch_id: selectedBranchData.id,
+      people_count: parseInt(peopleCount, 10),
+      ip_address: userIP,
+    };
+
+    const response = await axios.post(`${API_BASE_URL}/reports`, data);
+
+    if (response.status === 200 || response.status === 201) {
+      alert("✅ הדיווח נשלח בהצלחה!");
+      setShowReportModal(false);
+      fetchReports();
     }
-  };
-
-  useEffect(() => {
-    fetchReports();
-    const interval = setInterval(fetchReports, 9000);
-    return () => clearInterval(interval);
-  }, []);
-
-  /** 📩 שליחת דיווח */
-  const handleSubmitReport = async () => {
-    if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
-      return alert("🚫 אינך יכול לדווח כרגע! אנא נסה מאוחר יותר.");
-    }
-
-    try {
-      const selectedBranchData = branches.find((branch) => branch.branch_name === selectedBranch);
-      if (!selectedBranchData) return alert("⚠️ שגיאה: לא נמצא סניף שנבחר.");
-
-      const ipResponse = await axios.get("https://api64.ipify.org?format=json");
-      const userIP = ipResponse.data.ip;
-
-      const data = {
-        branch_id: selectedBranchData.id,
-        people_count: parseInt(peopleCount, 10),
-        ip_address: userIP,
-      };
-
-      const response = await axios.post(`${API_BASE_URL}/reports`, data);
-
-      if (response.status === 200 || response.status === 201) {
-        alert("✅ הדיווח נשלח בהצלחה!");
-        setShowReportModal(false);
-        fetchReports();
-      }
-    } catch (error) {
-      console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
-    }
-  };
+  } catch (error) {
+    console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
+  }
+};
 
   return (
     <div className="container">
       <HelloUser userName={userName} />
       <h2>מצב עומסים</h2>
-
-      {closestBranch && <p>📍 הסניף הקרוב ביותר: {closestBranch.branch_name}</p>}
 
       <div className="reports-list">
         {loading ? (
@@ -188,8 +212,14 @@ const HomePage = () => {
           ))
         )}
       </div>
+      <button 
+        style={{ backgroundColor: isBlocked ? "gray" : "red", cursor: isBlocked ? "not-allowed" : "pointer" }}
+        disabled={isBlocked}
+        onClick={() => !isBlocked && setShowReportModal(true)}
+      >
+        {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
+      </button>
 
-      <button onClick={() => !isBlocked && setShowReportModal(true)}>📢 דווח עומס</button>
 
       {showReportModal && (
         <div className="modal">
@@ -197,10 +227,14 @@ const HomePage = () => {
             <h2>📢 דווח עומס</h2>
             <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
               <option value="">בחר סניף</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.branch_name}>
-                  {branch.branch_name}
-                </option>
+              {["צפון", "מרכז", "דרום"].map((region) => (
+                <optgroup key={region} label={`🌍 ${region}`}>
+                  {branches.filter((branch) => branch.region === region).map((branch) => (
+                    <option key={branch.id} value={branch.branch_name}>
+                      {branch.branch_name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <input type="number" placeholder="👥 מספר אנשים לפניך" min="1" max="85"
