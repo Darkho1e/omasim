@@ -1,0 +1,152 @@
+/* בסיס */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+/* קונטיינר ראשי */
+.container {
+  width: 90%; /* במקום 80% - יותר גמיש */
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  font-size: 24px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #cc0000;
+}
+
+/* שדות טקסט ובחירה */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* ניווט */
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+}
+
+/* כרטיסיות סניפים */
+.branches-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.branch-card {
+  flex: 1 1 calc(33.33% - 20px); /* תופס 3 בעמודה בדסקטופ */
+  max-width: 300px;
+  min-width: 250px;
+  padding: 15px;
+  margin: 10px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.branch-card:hover {
+  transform: scale(1.05);
+}
+
+/* כפתור הדיווח */
+.report-button {
+  background-color: red;
+  color: white;
+  padding: 15px;
+  font-size: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+/* עיצוב תפריט הדיווח (מודאל) */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.modal select, .modal input {
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.modal button {
+  margin-top: 10px;
+  padding: 12px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+/* 🔹 רספונסיביות לכל המסכים 🔹 */
+@media (max-width: 1024px) {
+  .branch-card {
+    flex: 1 1 calc(50% - 20px); /* 2 בעמודה בטאבלט */
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .branch-card {
+    flex: 1 1 calc(100% - 20px); /* כרטיסייה אחת בשורה בנייד */
+  }
+
+  .modal {
+    width: 95%;
+    max-width: 350px;
+  }
+}

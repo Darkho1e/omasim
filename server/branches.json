@@ -1,0 +1,210 @@
+[
+  {
+    "id": 1,
+    "branch_name": "ביקור רופא חיפה",
+    "address": "שדרות בן גוריון 17, חיפה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 2,
+    "branch_name": "ביקור רופא חדרה",
+    "address": "צה\"ל 35, מתחם מיקס, חדרה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 3,
+    "branch_name": "ביקור רופא כרמיאל",
+    "address": "קק''ל 99/31, כרמיאל",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 4,
+    "branch_name": "ביקור רופא עפולה",
+    "address": "יהושע חנקין 15 , עפולה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 5,
+    "branch_name": "ביקור רופא נהריה",
+    "address": "הרצל 77, קומה 1 , נהריה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 6,
+    "branch_name": "ביקור רופא קריית שמונה",
+    "address": "טשרניחובסקי 5 (בניין מד''א), קריית שמונה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 7,
+    "branch_name": "ביקור רופא טבריה",
+    "address": "העמקים 107, טבריה",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 8,
+    "branch_name": "ביקור רופא קצרין",
+    "address": "שיאון 6 מאחורי הקניון , קצרין",
+    "region": "צפון",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 10,
+    "branch_name": "ביקור רופא תל אביב",
+    "address": "יגאל אלון 92 , תל אביב",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 11,
+    "branch_name": "ביקור רופא קריית אונו",
+    "address": "הדובדבן 7 קריית אונו",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 12,
+    "branch_name": "ביקור רופא כפר סבא",
+    "address": "אלי הורוביץ 12 , כפר סבא",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 13,
+    "branch_name": "ביקור רופא נתניה",
+    "address": "רחוב גיבורי ישראל 24 , נתניה",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 14,
+    "branch_name": "ביקור רופא ראשון לציון",
+    "address": "לזרוב 33 , ראשון לציון",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 15,
+    "branch_name": "ביקור רופא אריאל",
+    "address": "דרך הנחשונים 69 א' , אריאל",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 16,
+    "branch_name": "ביקור רופא חולון",
+    "address": "ההסתדרות 35 , חולון",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 17,
+    "branch_name": "ביקור רופא ירושלים",
+    "address": "בית הדפוס 22, גבעת שאול",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 18,
+    "branch_name": "ביקור רופא מבשרת ציון",
+    "address": "רחוב המגרסות 1 , מבשרת ציון",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 19,
+    "branch_name": "ביקור רופא מודיעין",
+    "address": "יגאל ידין 41 , מודיעין",
+    "region": "מרכז",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+
+  {
+    "id": 20,
+    "branch_name": "ביקור רופא אשדוד",
+    "address": "האורגים 18 , אשדוד ",
+    "region": "דרום",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 21,
+    "branch_name": "ביקור רופא אשקלון",
+    "address": "העוז 1 , אשקלון",
+    "region": "דרום",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 22,
+    "branch_name": "ביקור רופא באר שבע",
+    "address": "יצחק בן צבי 9 , באר שבע",
+    "region": "דרום",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 23,
+    "branch_name": "ביקור רופא מצפה רמון",
+    "address": "בן גוריון 1 , מצפה רמון",
+    "region": "דרום",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  },
+  {
+    "id": 24,
+    "branch_name": "ביקור רופא אילת",
+    "address": "הערבה 6 , אילת",
+    "region": "דרום",
+    "currentLoad": 0,
+    "lastReportTime": null,
+    "lastReporterName": null
+  }
+]
