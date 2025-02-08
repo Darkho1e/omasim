@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
 import axios from "axios";
 import HelloUser from "../components/HelloUser";
 
@@ -14,7 +15,9 @@ const HomePage = () => {
   const [userName, setUserName] = useState("משתמש");
   const [userLocation, setUserLocation] = useState(null);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [closestBranch, setClosestBranch] = useState(null);
+  const countdownInterval = useRef(null); // ✅ הגדרת משתנה לשמירת הטיימר
 
   /** 🚀 שליפת שם המשתמש מהשרת */
   useEffect(() => {
@@ -83,111 +86,125 @@ const HomePage = () => {
     }
   }, [userLocation, branches]);
 
-  /** 📊 שליפת דיווחים ובדיקת חסימה */
-    /** 📊 שליפת דיווחים ובדיקת חסימה */
-    const fetchReports = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/reports`);
-        
-        if (response.data?.isBlocked !== undefined) {
-          setIsBlocked(response.data.isBlocked);
+   /** 📊 שליפת דיווחים ובדיקת חסימה */
+   const fetchReports = async () => {
+    try {
+      const ipResponse = await axios.get("https://api64.ipify.org?format=json");
+      const userIP = ipResponse.data.ip;
   
-          if (response.data.blockedUntil) {
-            startCountdown(response.data.blockedUntil);
-          } else {
-            setTimeLeft(0);
-          }
-        }
+      const response = await axios.get(`${API_BASE_URL}/reports`, {
+        params: { ip: userIP },
+      });
   
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          const groupedReports = response.data.reduce((acc, report) => {
-            if (!acc[report.branch_id]) {
-              acc[report.branch_id] = {
-                branch_name: report.branch_name,
-                total_people: report.people_count,
-                count: 1,
-                last_reported: report.reported_at,
-                region: report.region
-              };
-            } else {
-              acc[report.branch_id].total_people += report.people_count;
-              acc[report.branch_id].count += 1;
-              acc[report.branch_id].last_reported = report.reported_at;
-            }
-            return acc;
-          }, {});
+      // console.log("📊 תגובת השרת:", response.data);
   
-          const averagedReports = Object.values(groupedReports).map(report => ({
-            branch_name: report.branch_name,
-            people_count: Math.round(report.total_people / report.count),
-            reported_at: report.last_reported,
-            region: report.region
-          }));
+      if (response.data?.isBlocked !== undefined) {
+        setIsBlocked(response.data.isBlocked);
   
-          setReports(averagedReports);
+        if (response.data.isBlocked && response.data.blockedUntil) {
+          // console.log("⏳ זמן חסימה מהשרת:", response.data.blockedUntil);
+          startCountdown(response.data.blockedUntil);
         } else {
-          setReports([]);
-        }
-      } catch (error) {
-        console.error("⚠️ שגיאה בטעינת הדיווחים:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetchReports();
-      const interval = setInterval(fetchReports, 9000);
-      return () => clearInterval(interval);
-    }, []);
-  
-    /** ⏳ ספירה לאחור לזמן חסימה */
-    const startCountdown = (blockedUntil) => {
-      const interval = setInterval(() => {
-        const now = new Date();
-        const blockedTime = new Date(blockedUntil);
-        const remainingTime = Math.max((blockedTime - now) / 1000, 0); // שניות
-  
-        setTimeLeft(Math.ceil(remainingTime / 60)); // הצגת דקות
-  
-        if (remainingTime <= 0) {
-          setIsBlocked(false);
           setTimeLeft(0);
-          clearInterval(interval);
         }
-      }, 1000);
-    };
+      }
   
- /** 📩 שליחת דיווח */
- const handleSubmitReport = async () => {
-  if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
-    return alert("🚫 אינך יכול לדווח כרגע! אנא נסה מאוחר יותר.");
-  }
-
-  try {
-    const selectedBranchData = branches.find((branch) => branch.branch_name === selectedBranch);
-    if (!selectedBranchData) return alert("⚠️ שגיאה: לא נמצא סניף שנבחר.");
-
-    const ipResponse = await axios.get("https://api64.ipify.org?format=json");
-    const userIP = ipResponse.data.ip;
-
-    const data = {
-      branch_id: selectedBranchData.id,
-      people_count: parseInt(peopleCount, 10),
-      ip_address: userIP,
-    };
-
-    const response = await axios.post(`${API_BASE_URL}/reports`, data);
-
-    if (response.status === 200 || response.status === 201) {
-      alert("✅ הדיווח נשלח בהצלחה!");
-      setShowReportModal(false);
-      fetchReports();
+      if (Array.isArray(response.data.reports) && response.data.reports.length > 0) {
+        // מניעת כפילויות ושימוש במפה כדי להבטיח שהדיווחים מוצגים נכון
+        const uniqueReports = new Map();
+  
+        response.data.reports.forEach((report) => {
+          if (!uniqueReports.has(report.branch_id)) {
+            uniqueReports.set(report.branch_id, {
+              branch_name: report.branch_name,
+              people_count: report.people_count,
+              reported_at: report.reported_at,
+              region: report.region,
+            });
+          }
+        });
+  
+        setReports(Array.from(uniqueReports.values()));
+      } else {
+        setReports([]);
+      }
+    } catch (error) {
+      console.error("⚠️ שגיאה בטעינת הדיווחים:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
-  }
-};
+  };
+  
+
+  useEffect(() => {
+    fetchReports();
+    const interval = setInterval(fetchReports, 9000);
+    return () => clearInterval(interval);
+  }, []);
+
+  /** ⏳ ספירה לאחור לזמן חסימה */
+  const startCountdown = (blockedUntil) => {
+    const blockedTime = new Date(blockedUntil);
+    if (isNaN(blockedTime.getTime())) {
+      console.error("❌ זמן חסימה לא תקף:", blockedUntil);
+      return;
+    }
+  
+    // console.log("⏳ הפעלת ספירה לאחור:", blockedTime.toLocaleString());
+  
+    if (countdownInterval.current) {
+      clearInterval(countdownInterval.current);
+    }
+  
+    countdownInterval.current = setInterval(() => {
+      const now = new Date();
+      const remainingTime = Math.max((blockedTime - now) / 1000, 0);
+  
+      // console.log("⏱️ זמן שנותר:", remainingTime, "שניות");
+  
+      if (remainingTime > 0) {
+        setTimeLeft(Math.ceil(remainingTime / 60));
+        setIsBlocked(true);
+      } else {
+        setIsBlocked(false);
+        setTimeLeft(0);
+        clearInterval(countdownInterval.current);
+      }
+    }, 1000);
+  };
+  
+  /** 📩 שליחת דיווח */
+  const handleSubmitReport = async () => {
+    if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
+      return alert("🚫 אינך יכול לדווח כרגע! אנא נסה מאוחר יותר.");
+    }
+
+    try {
+      const selectedBranchData = branches.find((branch) => branch.branch_name === selectedBranch);
+      if (!selectedBranchData) return alert("⚠️ שגיאה: לא נמצא סניף שנבחר.");
+
+      const ipResponse = await axios.get("https://api64.ipify.org?format=json");
+      const userIP = ipResponse.data.ip;
+
+      const data = {
+        branch_id: selectedBranchData.id,
+        people_count: parseInt(peopleCount, 10),
+        ip_address: userIP,
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/reports`, data);
+
+      if (response.status === 200 || response.status === 201) {
+        alert("✅ הדיווח נשלח בהצלחה!");
+        setShowReportModal(false);
+        fetchReports();
+      }
+    } catch (error) {
+      console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
+    }
+  };
+
+
 
   return (
     <div className="container">
@@ -212,8 +229,12 @@ const HomePage = () => {
           ))
         )}
       </div>
-      <button 
-        style={{ backgroundColor: isBlocked ? "gray" : "red", cursor: isBlocked ? "not-allowed" : "pointer" }}
+      
+      <button
+        style={{
+          backgroundColor: isBlocked ? "gray" : "red",
+          cursor: isBlocked ? "not-allowed" : "pointer",
+        }}
         disabled={isBlocked}
         onClick={() => !isBlocked && setShowReportModal(true)}
       >
