@@ -50,29 +50,61 @@ app.get("/branches", async (req, res) => {
   }
 });
 
-/** 📌 שליפת דיווחים אחרונים */
+/** 📌 שליפת דיווחים אחרונים עם ממוצע עומס + בדיקת חסימה */
 app.get("/reports", async (req, res) => {
     try {
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
-      
+      const { ip } = req.query;
+      const now = new Date();
+  
+      // בדיקת חסימה עבור המשתמש
+      let isBlocked = false;
+      let blockedUntil = null;
+  
+      const blockQuery = await pool.query(
+        `SELECT reported_at FROM reports 
+         WHERE ip_address = $1 
+         ORDER BY reported_at DESC LIMIT 1`,
+        [ip]
+      );
+  
+      if (blockQuery.rowCount > 0) {
+        const lastReportTime = new Date(blockQuery.rows[0].reported_at);
+        blockedUntil = new Date(lastReportTime.getTime() + 0.5 * 60 * 1000); // חסימה ל-35 דקות
+  
+        if (now < blockedUntil) {
+          isBlocked = true;
+        }
+      }
+  
+      // שליפת הדיווחים עם ממוצע לכל סניף
       const query = `
-        SELECT r.id, r.branch_id, r.people_count, r.reported_at, r.ip_address, 
-               b.branch_name, b.region
+        SELECT r.branch_id, b.branch_name, b.region,
+               ROUND(AVG(r.people_count)) AS people_count,
+               MAX(r.reported_at) AS reported_at
         FROM reports r
         JOIN branches b ON r.branch_id = b.id
         WHERE r.reported_at >= $1
-        ORDER BY r.reported_at DESC
+        GROUP BY r.branch_id, b.branch_name, b.region
+        ORDER BY reported_at DESC
       `;
   
       const result = await pool.query(query, [fiveHoursAgo]);
-  
+    //   console.log("📊 נתוני הדיווחים:", result.rows);
 
-      res.json(result.rows);
+    //   console.log("🔴 isBlocked:", isBlocked, "| ⏳ blockedUntil:", blockedUntil);
+  
+      res.json({
+        reports: result.rows,
+        isBlocked,
+        blockedUntil: blockedUntil ? blockedUntil.toISOString() : null,
+      });
     } catch (error) {
       console.error("❌ שגיאה בשליפת הדיווחים:", error);
       res.status(500).json({ error: "שגיאת שרת פנימית" });
     }
   });
+  
   
 /** 📩 יצירת דיווח */
 app.post("/reports", async (req, res) => {
@@ -112,7 +144,7 @@ app.post("/reports", async (req, res) => {
     if (lastOtherBranchReport.rowCount > 0) {
       const lastReportedAt = new Date(lastOtherBranchReport.rows[0].reported_at);
       const diffMinutes = (now - lastReportedAt) / (1000 * 60);
-      if (diffMinutes < 1) {
+      if (diffMinutes < 120) {
         return res.status(429).json({ error: "🚫 לא ניתן לדווח על סניפים אחרים למשך שעתיים!" });
       }
     }
@@ -124,7 +156,7 @@ app.post("/reports", async (req, res) => {
       [branch_id, people_count, ip_address]
     );
 
-    console.log("✅ דיווח חדש נשלח:", newReport.rows[0]);
+    // console.log("✅ דיווח חדש נשלח:", newReport.rows[0]);
 
     return res.json({ success: true, message: "✅ הדיווח נשלח בהצלחה!" });
 

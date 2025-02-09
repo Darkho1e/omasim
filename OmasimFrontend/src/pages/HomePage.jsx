@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
 import axios from "axios";
 import HelloUser from "../components/HelloUser";
 
@@ -14,7 +15,9 @@ const HomePage = () => {
   const [userName, setUserName] = useState("משתמש");
   const [userLocation, setUserLocation] = useState(null);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [closestBranch, setClosestBranch] = useState(null);
+  const countdownInterval = useRef(null); // ✅ הגדרת משתנה לשמירת הטיימר
 
   /** 🚀 שליפת שם המשתמש מהשרת */
   useEffect(() => {
@@ -83,20 +86,47 @@ const HomePage = () => {
     }
   }, [userLocation, branches]);
 
-  /** 📊 שליפת דיווחים ובדיקת חסימה */
-  const fetchReports = async () => {
+   /** 📊 שליפת דיווחים ובדיקת חסימה */
+   const fetchReports = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/reports`);
+      const ipResponse = await axios.get("https://api64.ipify.org?format=json");
+      const userIP = ipResponse.data.ip;
+  
+      const response = await axios.get(`${API_BASE_URL}/reports`, {
+        params: { ip: userIP },
+      });
+  
+      // console.log("📊 תגובת השרת:", response.data);
+  
       if (response.data?.isBlocked !== undefined) {
         setIsBlocked(response.data.isBlocked);
+  
+        if (response.data.isBlocked && response.data.blockedUntil) {
+          // console.log("⏳ זמן חסימה מהשרת:", response.data.blockedUntil);
+          startCountdown(response.data.blockedUntil);
+        } else {
+          setTimeLeft(0);
+        }
       }
-
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        // קיבוץ דיווחים לפי סניף וחישוב ממוצע
-        const groupedReports = response.data.reduce((acc, report) => {
-          if (!acc[report.branch_id]) {
-            acc[report.branch_id] = {
+  
+      if (Array.isArray(response.data.reports) && response.data.reports.length > 0) {
+        // מניעת כפילויות ושימוש במפה כדי להבטיח שהדיווחים מוצגים נכון
+        const uniqueReports = new Map();
+  
+        response.data.reports.forEach((report) => {
+          if (!uniqueReports.has(report.branch_id)) {
+            uniqueReports.set(report.branch_id, {
               branch_name: report.branch_name,
+
+              people_count: report.people_count,
+              reported_at: report.reported_at,
+              region: report.region,
+            });
+          }
+        });
+  
+        setReports(Array.from(uniqueReports.values()));
+
               total_people: report.people_count,
               count: 1,
               last_reported: report.reported_at,
@@ -118,6 +148,7 @@ const HomePage = () => {
         }));
 
         setReports(averagedReports);
+
       } else {
         setReports([]);
       }
@@ -127,6 +158,7 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchReports();
@@ -134,6 +166,37 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  /** ⏳ ספירה לאחור לזמן חסימה */
+  const startCountdown = (blockedUntil) => {
+    const blockedTime = new Date(blockedUntil);
+    if (isNaN(blockedTime.getTime())) {
+      console.error("❌ זמן חסימה לא תקף:", blockedUntil);
+      return;
+    }
+  
+    // console.log("⏳ הפעלת ספירה לאחור:", blockedTime.toLocaleString());
+  
+    if (countdownInterval.current) {
+      clearInterval(countdownInterval.current);
+    }
+  
+    countdownInterval.current = setInterval(() => {
+      const now = new Date();
+      const remainingTime = Math.max((blockedTime - now) / 1000, 0);
+  
+      // console.log("⏱️ זמן שנותר:", remainingTime, "שניות");
+  
+      if (remainingTime > 0) {
+        setTimeLeft(Math.ceil(remainingTime / 60));
+        setIsBlocked(true);
+      } else {
+        setIsBlocked(false);
+        setTimeLeft(0);
+        clearInterval(countdownInterval.current);
+      }
+    }, 1000);
+  };
+  
   /** 📩 שליחת דיווח */
   const handleSubmitReport = async () => {
     if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
@@ -165,6 +228,8 @@ const HomePage = () => {
     }
   };
 
+
+
   return (
     <div className="container">
       <HelloUser userName={userName} />
@@ -188,7 +253,22 @@ const HomePage = () => {
           ))
         )}
       </div>
+
+      
+      <button
+        style={{
+          backgroundColor: isBlocked ? "gray" : "red",
+          cursor: isBlocked ? "not-allowed" : "pointer",
+        }}
+        disabled={isBlocked}
+        onClick={() => !isBlocked && setShowReportModal(true)}
+      >
+        {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
+      </button>
+
+
       <button onClick={() => !isBlocked && setShowReportModal(true)}>📢 דווח עומס</button>
+
 
       {showReportModal && (
         <div className="modal">
