@@ -117,6 +117,7 @@ const HomePage = () => {
           if (!uniqueReports.has(report.branch_id)) {
             uniqueReports.set(report.branch_id, {
               branch_name: report.branch_name,
+
               people_count: report.people_count,
               reported_at: report.reported_at,
               region: report.region,
@@ -125,6 +126,29 @@ const HomePage = () => {
         });
   
         setReports(Array.from(uniqueReports.values()));
+
+              total_people: report.people_count,
+              count: 1,
+              last_reported: report.reported_at,
+              region: report.region
+            };
+          } else {
+            acc[report.branch_id].total_people += report.people_count;
+            acc[report.branch_id].count += 1;
+            acc[report.branch_id].last_reported = report.reported_at;
+          }
+          return acc;
+        }, {});
+
+        const averagedReports = Object.values(groupedReports).map(report => ({
+          branch_name: report.branch_name,
+          people_count: Math.round(report.total_people / report.count),
+          reported_at: report.last_reported,
+          region: report.region
+        }));
+
+        setReports(averagedReports);
+
       } else {
         setReports([]);
       }
@@ -229,6 +253,7 @@ const HomePage = () => {
           ))
         )}
       </div>
+
       
       <button
         style={{
@@ -240,6 +265,9 @@ const HomePage = () => {
       >
         {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
       </button>
+
+
+      <button onClick={() => !isBlocked && setShowReportModal(true)}>📢 דווח עומס</button>
 
 
       {showReportModal && (
