@@ -116,6 +116,7 @@ const HomePage = () => {
             uniqueReports.set(report.branch_id, {
               branch_id: report.branch_id,
               branch_name: report.branch_name,
+
               people_count: report.people_count,
               reported_at: report.reported_at,
               region: report.region,
@@ -125,16 +126,6 @@ const HomePage = () => {
         });
 
         setReports(Array.from(uniqueReports.values()));
-
-        // השוואה בין הסניף שנבחר לבין האחרון שדווח עליו כדי לקבוע אם לחסום
-        if (selectedBranch) {
-          const selectedBranchData = branches.find(b => b.branch_name === selectedBranch);
-          if (selectedBranchData && selectedBranchData.id !== lastReportedBranch) {
-            setIsBlocked(true);
-          } else {
-            setIsBlocked(false);
-          }
-        }
       } else {
         setReports([]);
       }
@@ -238,6 +229,7 @@ const HomePage = () => {
           ))
         )}
       </div>
+
       
       <button
     style={{
@@ -249,7 +241,6 @@ const HomePage = () => {
 >
     {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
 </button>
-
 
 
       {showReportModal && (
