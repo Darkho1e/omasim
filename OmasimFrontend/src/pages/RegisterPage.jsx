@@ -17,7 +17,13 @@ const RegisterPage = () => {
         }
         
         try {
-            const response = await axios.post(`${API_BASE_URL}/register`, { name, email, phone });
+            const response = await axios.post(`${API_BASE_URL}/register`, { 
+                name, 
+                email, 
+                phone,
+                role: "user" // 👈 כברירת מחדל משתמשים חדשים יהיו USER
+            });
+
             alert("✅ ההרשמה הושלמה בהצלחה! כעת ניתן להתחבר.");
             navigate("/login"); // העברה לדף התחברות
         } catch (error) {

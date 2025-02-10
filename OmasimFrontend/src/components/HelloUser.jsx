@@ -23,7 +23,7 @@ const HelloUser = ({ userName }) => {
 
   return (
     <h2 style={{ fontSize: "24px", fontWeight: "bold", textAlign: "center", color: "#1E293B" }}>
-      {emoji} {greeting}, {userName || "משתמש"}! 
+     {emoji}{userName || "משתמש"} {greeting} 
 
       
     </h2>

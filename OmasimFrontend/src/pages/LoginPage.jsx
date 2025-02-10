@@ -23,7 +23,7 @@ const LoginPage = () => {
             const response = await axios.post(`${API_BASE_URL}/login`, payload);
 
             // ✅ שמירת הנתונים ב-localStorage
-            localStorage.setItem('token', response.data.token);
+            
             if (method === 'phone') {
                 localStorage.setItem('phone', phone);
                 console.log("📌 מספר טלפון נשמר:", phone);
@@ -69,6 +69,8 @@ const LoginPage = () => {
                 />
             )}
             <button onClick={handleLogin}>🚀 המשך</button>
+            <p> אין משתמש? <span className="link" onClick={() => navigate("/register")}>הירשם כאן</span></p>
+
         </div>
     );
 };

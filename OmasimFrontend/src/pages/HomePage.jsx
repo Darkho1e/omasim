@@ -40,6 +40,7 @@ const HomePage = () => {
 
     fetchUserName();
   }, []);
+  
 
   /** 📍 שליפת רשימת הסניפים */
   useEffect(() => {
@@ -91,40 +92,49 @@ const HomePage = () => {
     try {
       const ipResponse = await axios.get("https://api64.ipify.org?format=json");
       const userIP = ipResponse.data.ip;
-  
+
       const response = await axios.get(`${API_BASE_URL}/reports`, {
         params: { ip: userIP },
       });
-  
-      // console.log("📊 תגובת השרת:", response.data);
-  
+
       if (response.data?.isBlocked !== undefined) {
         setIsBlocked(response.data.isBlocked);
-  
+
         if (response.data.isBlocked && response.data.blockedUntil) {
-          // console.log("⏳ זמן חסימה מהשרת:", response.data.blockedUntil);
           startCountdown(response.data.blockedUntil);
         } else {
           setTimeLeft(0);
         }
       }
-  
+
       if (Array.isArray(response.data.reports) && response.data.reports.length > 0) {
-        // מניעת כפילויות ושימוש במפה כדי להבטיח שהדיווחים מוצגים נכון
         const uniqueReports = new Map();
-  
+        let lastReportedBranch = null; // נשמור את הסניף האחרון שהמשתמש דיווח עליו
+
         response.data.reports.forEach((report) => {
           if (!uniqueReports.has(report.branch_id)) {
             uniqueReports.set(report.branch_id, {
+              branch_id: report.branch_id,
               branch_name: report.branch_name,
               people_count: report.people_count,
               reported_at: report.reported_at,
               region: report.region,
             });
           }
+          lastReportedBranch = report.branch_id; // שמירה של הסניף האחרון שהמשתמש דיווח עליו
         });
-  
+
         setReports(Array.from(uniqueReports.values()));
+
+        // השוואה בין הסניף שנבחר לבין האחרון שדווח עליו כדי לקבוע אם לחסום
+        if (selectedBranch) {
+          const selectedBranchData = branches.find(b => b.branch_name === selectedBranch);
+          if (selectedBranchData && selectedBranchData.id !== lastReportedBranch) {
+            setIsBlocked(true);
+          } else {
+            setIsBlocked(false);
+          }
+        }
       } else {
         setReports([]);
       }
@@ -133,8 +143,7 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
-  };
-  
+};
 
   useEffect(() => {
     fetchReports();
@@ -202,7 +211,7 @@ const HomePage = () => {
     } catch (error) {
       console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
     }
-  };
+};
 
 
 
@@ -231,21 +240,27 @@ const HomePage = () => {
       </div>
       
       <button
-        style={{
-          backgroundColor: isBlocked ? "gray" : "red",
-          cursor: isBlocked ? "not-allowed" : "pointer",
-        }}
-        disabled={isBlocked}
-        onClick={() => !isBlocked && setShowReportModal(true)}
-      >
-        {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
-      </button>
+    style={{
+        backgroundColor: isBlocked ? "gray" : "red",
+        cursor: isBlocked ? "not-allowed" : "pointer",
+    }}
+    disabled={isBlocked}
+    onClick={() => !isBlocked && setShowReportModal(true)}
+>
+    {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
+</button>
+
 
 
       {showReportModal && (
         <div className="modal">
           <div className="modal-content">
             <h2>📢 דווח עומס</h2>
+            <p>!!שימו לב שאתם מדווחים נכון</p>
+            <p> כל דייוח לאותו סניף חוסם את האפשרות לדווח ל 35 דק </p>
+            <p>ואת הדיווח לסניפים האחרים למשך שעתיים</p>
+            <h5>ניתן לדווח עד 40 אנשים ועד 4 פעמים ביום</h5>
+            <h4>דווחו נכון בהצלחה</h4>
             <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
               <option value="">בחר סניף</option>
               {["צפון", "מרכז", "דרום"].map((region) => (
