@@ -71,37 +71,37 @@ export async function sendOtp(phone) {
   }
 }
 
-/**
- * ✅ **אימות OTP ושמירת טוקן**
- */
-export async function verifyOtp(email, otp) {
-  try {
-    console.log("🛂 שליחת OTP לאימות:", { email, otp });
+// /**
+//  * ✅ **אימות OTP ושמירת טוקן**
+//  */
+// export async function verifyOtp(email, otp) {
+//   try {
+//     console.log("🛂 שליחת OTP לאימות:", { email, otp });
 
-    const res = await axios.post(`${API_BASE}/verify-otp`, { email, otp });
+//     const res = await axios.post(`${API_BASE}/verify-otp`, { email, otp });
 
-    console.log("🔑 תגובת שרת לאימות OTP:", res.data);
+//     console.log("🔑 תגובת שרת לאימות OTP:", res.data);
 
-    if (res.data.success) {
-      const { token, userId } = res.data;
+//     if (res.data.success) {
+//       const { token, userId } = res.data;
 
-      if (!token || token === "undefined") {
-        console.error("❌ שגיאה - השרת לא החזיר טוקן תקין!");
-        return { success: false, error: "❌ טוקן לא תקין מהשרת" };
-      }
+//       if (!token || token === "undefined") {
+//         console.error("❌ שגיאה - השרת לא החזיר טוקן תקין!");
+//         return { success: false, error: "❌ טוקן לא תקין מהשרת" };
+//       }
 
-      console.log("✅ שמירת טוקן:", token);
-      setUserData(userId, token); // ✅ שמירת המשתמש והטוקן
+//       console.log("✅ שמירת טוקן:", token);
+//       setUserData(userId, token); // ✅ שמירת המשתמש והטוקן
 
-      return { success: true, token };
-    } else {
-      return { success: false, error: '❌ קוד לא נכון או פג תוקף' };
-    }
-  } catch (error) {
-    console.error("❌ שגיאה באימות OTP:", error);
-    return { success: false, error: error.response?.data?.error || '❌ שגיאה באימות' };
-  }
-}
+//       return { success: true, token };
+//     } else {
+//       return { success: false, error: '❌ קוד לא נכון או פג תוקף' };
+//     }
+//   } catch (error) {
+//     console.error("❌ שגיאה באימות OTP:", error);
+//     return { success: false, error: error.response?.data?.error || '❌ שגיאה באימות' };
+//   }
+// }
 
 /**
  * 🔐 התחברות עם Google

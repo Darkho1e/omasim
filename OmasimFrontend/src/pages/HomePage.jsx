@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-
 import axios from "axios";
 import HelloUser from "../components/HelloUser";
 
@@ -40,7 +39,6 @@ const HomePage = () => {
 
     fetchUserName();
   }, []);
-  
 
   /** 📍 שליפת רשימת הסניפים */
   useEffect(() => {
@@ -87,8 +85,8 @@ const HomePage = () => {
     }
   }, [userLocation, branches]);
 
-   /** 📊 שליפת דיווחים ובדיקת חסימה */
-   const fetchReports = async () => {
+  /** 📊 שליפת דיווחים ובדיקת חסימה */
+  const fetchReports = async () => {
     try {
       const ipResponse = await axios.get("https://api64.ipify.org?format=json");
       const userIP = ipResponse.data.ip;
@@ -116,7 +114,6 @@ const HomePage = () => {
             uniqueReports.set(report.branch_id, {
               branch_id: report.branch_id,
               branch_name: report.branch_name,
-
               people_count: report.people_count,
               reported_at: report.reported_at,
               region: report.region,
@@ -134,7 +131,7 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   useEffect(() => {
     fetchReports();
@@ -149,19 +146,15 @@ const HomePage = () => {
       console.error("❌ זמן חסימה לא תקף:", blockedUntil);
       return;
     }
-  
-    // console.log("⏳ הפעלת ספירה לאחור:", blockedTime.toLocaleString());
-  
+
     if (countdownInterval.current) {
       clearInterval(countdownInterval.current);
     }
-  
+
     countdownInterval.current = setInterval(() => {
       const now = new Date();
       const remainingTime = Math.max((blockedTime - now) / 1000, 0);
-  
-      // console.log("⏱️ זמן שנותר:", remainingTime, "שניות");
-  
+
       if (remainingTime > 0) {
         setTimeLeft(Math.ceil(remainingTime / 60));
         setIsBlocked(true);
@@ -172,11 +165,17 @@ const HomePage = () => {
       }
     }, 1000);
   };
-  
+
   /** 📩 שליחת דיווח */
   const handleSubmitReport = async () => {
     if (!selectedBranch || peopleCount.trim() === "" || isBlocked) {
       return alert("🚫 אינך יכול לדווח כרגע! אנא נסה מאוחר יותר.");
+    }
+
+    // המרת peopleCount למספר שלם והגבלת ל-40 מקסימום
+    const peopleCountNumber = parseInt(peopleCount, 10);
+    if (isNaN(peopleCountNumber) || peopleCountNumber <= 0 || peopleCountNumber > 40) {
+      return alert("⚠️ כמות הדיווח שדיווחת אינה תקינה! ניתן לדווח עד 40 אנשים.");
     }
 
     try {
@@ -188,7 +187,7 @@ const HomePage = () => {
 
       const data = {
         branch_id: selectedBranchData.id,
-        people_count: parseInt(peopleCount, 10),
+        people_count: peopleCountNumber, // השימוש במספר המוגבל
         ip_address: userIP,
       };
 
@@ -202,9 +201,7 @@ const HomePage = () => {
     } catch (error) {
       console.error("⚠️ שגיאה בשליחת הדיווח:", error.response?.data || error.message);
     }
-};
-
-
+  };
 
   return (
     <div className="container">
@@ -230,29 +227,31 @@ const HomePage = () => {
         )}
       </div>
 
-      
       <button
-    style={{
-        backgroundColor: isBlocked ? "gray" : "red",
-        cursor: isBlocked ? "not-allowed" : "pointer",
-    }}
-    disabled={isBlocked}
-    onClick={() => !isBlocked && setShowReportModal(true)}
->
-    {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
-</button>
-
+        style={{
+          backgroundColor: isBlocked ? "gray" : "red",
+          cursor: isBlocked ? "not-allowed" : "pointer",
+        }}
+        disabled={isBlocked}
+        onClick={() => !isBlocked && setShowReportModal(true)}
+      >
+        {isBlocked ? `🚫 חסום - ${timeLeft} דקות נותרו` : "📢 דווח עומס"}
+      </button>
 
       {showReportModal && (
         <div className="modal">
           <div className="modal-content">
             <h2>📢 דווח עומס</h2>
             <p>!!שימו לב שאתם מדווחים נכון</p>
-            <p> כל דייוח לאותו סניף חוסם את האפשרות לדווח ל 35 דק </p>
+            <p>כל דיווח לאותו סניף חוסם את האפשרות לדווח ל-35 דקות</p>
             <p>ואת הדיווח לסניפים האחרים למשך שעתיים</p>
             <h5>ניתן לדווח עד 40 אנשים ועד 4 פעמים ביום</h5>
             <h4>דווחו נכון בהצלחה</h4>
-            <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
+            <select 
+              value={selectedBranch} 
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="branch-select"
+            >
               <option value="">בחר סניף</option>
               {["צפון", "מרכז", "דרום"].map((region) => (
                 <optgroup key={region} label={`🌍 ${region}`}>
@@ -264,10 +263,24 @@ const HomePage = () => {
                 </optgroup>
               ))}
             </select>
-            <input type="number" placeholder="👥 מספר אנשים לפניך" min="1" max="85"
-                   value={peopleCount} onChange={(e) => setPeopleCount(e.target.value)} />
-            <button onClick={handleSubmitReport}>📩 שלח דיווח</button>
-            <button onClick={() => setShowReportModal(false)}>❌ סגור</button>
+            <input 
+              type="number" 
+              placeholder="👥 מספר אנשים לפניך" 
+              min="1" 
+              max="40"
+              value={peopleCount} 
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || (parseInt(value, 10) >= 1 && parseInt(value, 10) <= 40)) {
+                  setPeopleCount(value);
+                }
+              }}
+              className="people-input"
+            />
+            <div className="button-group">
+              <button onClick={handleSubmitReport} className="submit-btn">📩 שלח דיווח</button>
+              <button onClick={() => setShowReportModal(false)} className="close-btn">❌ סגור</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Nodemon",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,           // Must match the --inspect port above
+            "address": "localhost", // or "127.0.0.1" if needed
+            "restart": true,        // VS Code will keep trying if nodemon restarts the app
+            "skipFiles": [
+              "<node_internals>/**"
+            ]
+          }
+   ]
+}

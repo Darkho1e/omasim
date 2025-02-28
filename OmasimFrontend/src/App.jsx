@@ -6,7 +6,8 @@ import PhoneVerificationPage from "./pages/PhoneVerificationPage";
 import HomePage from "./pages/HomePage";
 import ReportPage from "./pages/ReportPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import "./styles/global.css";
+import ManageLogins from "./pages/ManageLogins";
+import "./index.css"; // ייבוא ה-CSS
 
 /**
  * ✅ קומפוננטה להגנה על ראוטים מוגנים עם בדיקה כל 5 שניות
@@ -72,6 +73,9 @@ const App = () => {
           {/* ראוטים פנימיים - דורשים טוקן עם בדיקה כל 5 שניות */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
+          {/* <Route path="/manage-logins" element={<ProtectedRoute><ManageLogins /></ProtectedRoute>} /> */}
+
+
 
           {/* דף 404 */}
           <Route path="*" element={<NotFoundPage />} />

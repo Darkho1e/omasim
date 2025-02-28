@@ -24,34 +24,290 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #242424;
+  width: 100%;
 }
 
-h1 {
-  font-size: 3.2em;
+.container {
+  text-align: center;
+  padding: 15px; /* מרווח קטן יותר עבור טלפונים */
+  width: 90%;
+  max-width: 800px; /* רוחב מקסימלי עבור מחשבים */
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  font-size: 2.5em; /* גודל קטן יותר עבור טלפונים */
   line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 15px;
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: 0.5em 1em; /* מרווח קטן יותר עבור טלפונים */
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background-color 0.25s;
+  color: #ffffff;
+  margin-top: 15px;
 }
 button:hover {
   border-color: #646cff;
+  background-color: #2d2d2d;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+button:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* סגנונות חדשים ל-modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 15px; /* מרווח קטן יותר עבור טלפונים */
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px; /* רוחב מקסימלי עבור modal */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #333;
+  position: relative;
+}
+
+.modal-content h2 {
+  font-size: 1.3em; /* גודל קטן יותר עבור טלפונים */
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.modal-content p {
+  margin: 8px 0;
+  font-size: 0.8em; /* גודל קטן יותר עבור טלפונים */
+  color: #666;
+}
+
+.modal-content h5, .modal-content h4 {
+  margin: 5px 0;
+  font-size: 0.9em; /* גודל קטן יותר עבור טלפונים */
+  color: #2c3e50;
+}
+
+/* סגנונות לשדות בחירה ואינפוט */
+.branch-select, .people-input {
+  width: 80%;
+  padding: 8px; /* מרווח קטן יותר עבור טלפונים */
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9em; /* גודל קטן יותר עבור טלפונים */
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.branch-select:focus, .people-input:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 5px rgba(100, 108, 255, 0.3);
+}
+
+.branch-select:disabled, .people-input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.7;
+  color: #666;
+}
+
+/* סגנונות לכפתורים ב-modal */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* מרווח קטן יותר עבור טלפונים */
+  margin-top: 15px;
+}
+
+.submit-btn, .close-btn {
+  padding: 8px 16px; /* מרווח קטן יותר עבור טלפונים */
+  font-size: 0.9em; /* גודל קטן יותר עבור טלפונים */
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.submit-btn {
+  background-color: #4CAF50; /* ירוק */
+  color: white;
+}
+.submit-btn:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+.submit-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.close-btn {
+  background-color: #f44336; /* אדום */
+  color: white;
+}
+.close-btn:hover {
+  background-color: #da190b;
+  transform: scale(1.05);
+}
+
+/* סגנונות לרשימת הדיווחים */
+.reports-list {
+  margin: 15px 0; /* מרווח קטן יותר עבור טלפונים */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* מרווח קטן יותר עבור טלפונים */
+}
+
+.report-card {
+  padding: 10px; /* מרווח קטן יותר עבור טלפונים */
+  border-radius: 5px;
+  color: #ffffff;
+  text-align: left;
+  max-width: 100%; /* רוחב מלא עבור טלפונים */
+  margin: 0 auto;
+}
+
+/* Media Queries עבור רספונסיביות */
+@media (max-width: 768px) { /* טאבלטים ומטה */
+  .container {
+    padding: 10px;
+    width: 95%;
+  }
+
+  h1, h2 {
+    font-size: 2em; /* גודל קטן יותר עבור טאבלטים */
+  }
+
+  .modal-content {
+    padding: 10px;
+    max-width: 350px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.2em;
+  }
+
+  .modal-content p {
+    font-size: 0.7em;
+  }
+
+  .modal-content h5, .modal-content h4 {
+    font-size: 0.8em;
+  }
+
+  .branch-select, .people-input {
+    width: 90%;
+    padding: 6px;
+    font-size: 0.8em;
+  }
+
+  .button-group {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .submit-btn, .close-btn {
+    padding: 6px 12px;
+    font-size: 0.8em;
+  }
+
+  .reports-list {
+    margin: 10px 0;
+    gap: 6px;
+  }
+
+  .report-card {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) { /* טלפונים קטנים */
+  .container {
+    padding: 5px;
+    width: 98%;
+  }
+
+  h1, h2 {
+    font-size: 1.5em; /* גודל קטן מאוד עבור טלפונים קטנים */
+  }
+
+  .modal-content {
+    padding: 8px;
+    max-width: 300px;
+  }
+
+  .modal-content h2 {
+    font-size: 1em;
+  }
+
+  .modal-content p {
+    font-size: 0.6em;
+  }
+
+  .modal-content h5, .modal-content h4 {
+    font-size: 0.7em;
+  }
+
+  .branch-select, .people-input {
+    width: 95%;
+    padding: 4px;
+    font-size: 0.7em;
+  }
+
+  .button-group {
+    gap: 6px;
+    margin-top: 8px;
+    flex-direction: column; /* כפתורים זה מתחת לזה בטלפונים קטנים */
+  }
+
+  .submit-btn, .close-btn {
+    padding: 4px 10px;
+    font-size: 0.7em;
+    width: 100%; /* כפתורים מלאים ברוחב במסכים קטנים */
+  }
+
+  .reports-list {
+    margin: 8px 0;
+    gap: 5px;
+  }
+
+  .report-card {
+    padding: 6px;
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -62,7 +318,43 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
+  body {
+    background-color: #ffffff;
+  }
+  .container {
+    background-color: rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .modal-content {
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  .modal-content h2, .modal-content h5, .modal-content h4 {
+    color: #2c3e50;
+  }
+  .modal-content p {
+    color: #666;
+  }
+  .branch-select, .people-input {
+    border-color: #ccc;
+  }
+  .branch-select:focus, .people-input:focus {
+    border-color: #747bff;
+    box-shadow: 0 0 5px rgba(116, 123, 255, 0.3);
+  }
+  .branch-select:disabled, .people-input:disabled {
+    background-color: #e0e0e0;
+    color: #666;
+  }
+  .report-card {
+    color: #333;
+  }
   button {
     background-color: #f9f9f9;
+    color: #213547;
+  }
+  button:hover {
+    background-color: #e0e0e0;
+    border-color: #747bff;
   }
 }
